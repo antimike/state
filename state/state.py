@@ -5,8 +5,9 @@ from abc import abstractmethod, ABC
 from typing import final, TypeVar, Type, Callable, Optional, Hashable, Any
 
 logger = logging.getLogger()
-INDENT = '    '
-T = TypeVar('T')
+INDENT = "    "
+T = TypeVar("T")
+
 
 class Updater(ABC):
     """ABC Updater.
@@ -22,7 +23,8 @@ class Updater(ABC):
         if cls.is_atomic(type(original)):
             raise TypeError(
                 "Updater {upd} cannot update type {tp}".format(
-                    upd=cls, tp=type(original))
+                    upd=cls, tp=type(original)
+                )
             )
 
     @final
@@ -41,6 +43,7 @@ class Updater(ABC):
         """
         return NotImplemented
 
+
 class Updatable(ABC):
     """ABC Updatable.
     Model for a container which can accept updates.
@@ -57,6 +60,7 @@ class Updatable(ABC):
     def update(self: Updatable, other: Updatable) -> None:
         pass
 
+
 class State(Updater, Updatable):
     """ABC State.
     Model for a stateful, mutable data container.
@@ -71,7 +75,8 @@ class State(Updater, Updatable):
         # first.update(second)
 
     @abstractmethod
-    def copy(self: State) -> State: ...
+    def copy(self: State) -> State:
+        ...
 
     @classmethod
     def is_updatable(cls: Type[State], C: Type[T]) -> bool:
@@ -85,10 +90,12 @@ class State(Updater, Updatable):
         copy.update(other)
         return copy
 
+
 class StateDict(dict, State):
     """class StateDict.
     A subclass of dict and State which recursively calls all substates' 'update' methods on update.
     """
+
     @final
     def __update__(self: StateDict, other: StateDict) -> None:
         for key in other:
@@ -108,12 +115,11 @@ class StateDict(dict, State):
 
     @final
     def update(self: StateDict, *args, **kwargs) -> None:
-        self.__update__(
-            self.__class__(*args, **kwargs)
-        )
+        self.__update__(self.__class__(*args, **kwargs))
 
     def copy(self: StateDict) -> StateDict:
         return super().copy()
+
 
 class View(StateDict):
     """class View.
@@ -123,6 +129,7 @@ class View(StateDict):
 
     def _add_item(self, key, val=None):
         pass
+
 
 class History(list, Updatable):
     """class History.
